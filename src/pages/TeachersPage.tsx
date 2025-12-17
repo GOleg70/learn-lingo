@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import type { Teacher } from "../types/teacher";
 import { fetchTeachersPage } from "../services/teachers/teachersApi";
+import { TeacherCard } from "../components/TeacherCard/TeacherCard";
 
 export function TeachersPage() {
   const [items, setItems] = useState<Teacher[]>([]);
@@ -71,26 +72,8 @@ export function TeachersPage() {
 
       <ul style={{ display: "grid", gap: 12, padding: 0, listStyle: "none" }}>
         {items.map((t) => (
-          <li
-            key={t.id}
-            style={{
-              border: "1px solid #ddd",
-              borderRadius: 8,
-              padding: 12,
-            }}
-          >
-            <strong>
-              {t.name} {t.surname}
-            </strong>
-            <div>Price: {t.price_per_hour} / hour</div>
-            <div>Rating: {t.rating}</div>
-            <div>
-              Languages:{" "}
-              {Array.isArray(t.languages) ? t.languages.join(", ") : ""}
-            </div>
-            <div>
-              Levels: {Array.isArray(t.levels) ? t.levels.join(", ") : ""}
-            </div>
+          <li key={t.id}>
+            <TeacherCard teacher={t} />
           </li>
         ))}
       </ul>
