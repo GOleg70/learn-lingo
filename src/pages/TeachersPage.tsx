@@ -7,6 +7,9 @@ export function TeachersPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const [cursor, setCursor] = useState<string | null>(null);
+  const [hasMore, setHasMore] = useState(true);
+
   useEffect(() => {
     let isMounted = true;
 
@@ -18,6 +21,8 @@ export function TeachersPage() {
         const res = await fetchTeachersPage(4, null);
         if (isMounted) {
           setItems(res.items);
+          setCursor(res.nextCursor);
+          setHasMore(res.nextCursor !== null);
         }
       } catch (e) {
         if (isMounted) {
@@ -37,18 +42,42 @@ export function TeachersPage() {
     };
   }, []);
 
+  async function handleLoadMore() {
+    if (!hasMore || isLoading) return;
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const res = await fetchTeachersPage(4, cursor);
+      setItems((prev) => [...prev, ...res.items]);
+      setCursor(res.nextCursor);
+      setHasMore(res.nextCursor !== null);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to load more teachers");
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
   return (
     <section>
       <h1>Teachers</h1>
 
-      {isLoading && <p>Loading...</p>}
+      {isLoading && items.length === 0 && <p>Loading...</p>}
       {error && <p style={{ color: "crimson" }}>{error}</p>}
+
+      {!isLoading && !error && items.length === 0 && <p>No teachers found.</p>}
 
       <ul style={{ display: "grid", gap: 12, padding: 0, listStyle: "none" }}>
         {items.map((t) => (
           <li
             key={t.id}
-            style={{ border: "1px solid #ddd", borderRadius: 8, padding: 12 }}
+            style={{
+              border: "1px solid #ddd",
+              borderRadius: 8,
+              padding: 12,
+            }}
           >
             <strong>
               {t.name} {t.surname}
@@ -65,6 +94,14 @@ export function TeachersPage() {
           </li>
         ))}
       </ul>
+
+      {hasMore && (
+        <div style={{ marginTop: 16 }}>
+          <button type="button" onClick={handleLoadMore} disabled={isLoading}>
+            {isLoading ? "Loading..." : "Load more"}
+          </button>
+        </div>
+      )}
     </section>
   );
 }
