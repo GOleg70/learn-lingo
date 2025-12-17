@@ -1,12 +1,15 @@
 import { useState } from "react";
 import type { Teacher } from "../../types/teacher";
 import styles from "./TeacherCard.module.css";
+import { useAuth } from "../../auth/useAuth";
 
 type Props = {
   teacher: Teacher;
 };
 
 export function TeacherCard({ teacher }: Props) {
+  const { user, isFavorite, toggleFavorite } = useAuth();
+  const favorite = isFavorite(teacher.id);
   const [isExpanded, setIsExpanded] = useState(false);
 
   const {
@@ -108,9 +111,19 @@ export function TeacherCard({ teacher }: Props) {
         <button
           type="button"
           className={styles.heart}
-          aria-label="Add to favorites"
+          onClick={async () => {
+            if (!user) {
+              alert("This feature is available only for authorized users.");
+              return;
+            }
+            await toggleFavorite(teacher.id);
+          }}
         >
-          ♡
+          {favorite ? "❤️" : "♡"}
+        </button>
+
+        <button type="button" onClick={() => setIsExpanded((v) => !v)}>
+          {isExpanded ? "Hide" : "Read more"}
         </button>
       </div>
     </article>
