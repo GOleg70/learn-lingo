@@ -2,7 +2,8 @@ import { createBrowserRouter } from "react-router-dom";
 import { RootLayout } from "../layouts/RootLayout";
 import { HomePage } from "../pages/HomePage";
 import { TeachersPage } from "../pages/TeachersPage";
-import { FavoritesPage } from "../pages/FavoritesPage";
+import FavoritesPage from "../pages/FavoritesPage";
+import { ProtectedRoute } from "../components/ProtectedRoute/ProtectedRoute";
 
 export const router = createBrowserRouter([
   {
@@ -11,7 +12,14 @@ export const router = createBrowserRouter([
     children: [
       { index: true, element: <HomePage /> },
       { path: "teachers", element: <TeachersPage /> },
-      { path: "favorites", element: <FavoritesPage /> },
+      {
+        path: "favorites",
+        element: (
+          <ProtectedRoute>
+            <FavoritesPage />
+          </ProtectedRoute>
+        ),
+      },
     ],
   },
 ]);

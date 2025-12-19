@@ -1,8 +1,9 @@
-import { NavLink, Outlet } from "react-router-dom";
-import { useState } from "react";
+import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 import { useAuth } from "../auth/useAuth";
 import { AuthModal } from "../components/AuthModal/AuthModal";
 import { logout } from "../services/auth/authApi";
+import { Toast } from "../components/Toast/Toast";
 
 const linkStyle = ({ isActive }: { isActive: boolean }) => ({
   textDecoration: "none",
@@ -12,6 +13,20 @@ const linkStyle = ({ isActive }: { isActive: boolean }) => ({
 export function RootLayout() {
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const { user, isAuthLoading } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [toastOpen, setToastOpen] = useState(false);
+
+  useEffect(() => {
+    const from = (location.state as { from?: string } | null)?.from;
+
+    if (from === "/favorites" && !user && !toastOpen) {
+      // ✅ не синхронно в effect
+      setTimeout(() => setToastOpen(true), 0);
+
+      navigate(location.pathname, { replace: true, state: null });
+    }
+  }, [location.state, location.pathname, navigate, user, toastOpen]);
 
   return (
     <div style={{ maxWidth: 1100, margin: "0 auto", padding: 24 }}>
@@ -60,6 +75,11 @@ export function RootLayout() {
       </main>
 
       <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} />
+      <Toast
+        isOpen={toastOpen}
+        message="Favorites are available only for authorized users. Please log in."
+        onClose={() => setToastOpen(false)}
+      />
     </div>
   );
 }

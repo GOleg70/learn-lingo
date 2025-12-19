@@ -1,11 +1,13 @@
 import {
   ref,
   get,
+  child,
   query,
   orderByKey,
   limitToFirst,
   startAfter,
 } from "firebase/database";
+
 import { db } from "../firebase/firebase";
 import type { Teacher } from "../../types/teacher";
 
@@ -47,4 +49,20 @@ export async function fetchTeachersPage(
     entries.length === pageSize ? entries[entries.length - 1][0] : null;
 
   return { items, nextCursor };
+}
+export async function fetchTeachersByIds(ids: string[]): Promise<Teacher[]> {
+  const rootRef = ref(db);
+
+  const snaps = await Promise.all(
+    ids.map((id) => get(child(rootRef, `teachers/${id}`)))
+  );
+
+  const teachers: Teacher[] = [];
+  snaps.forEach((snap, idx) => {
+    if (snap.exists()) {
+      teachers.push({ id: ids[idx], ...(snap.val() as Omit<Teacher, "id">) });
+    }
+  });
+
+  return teachers;
 }
