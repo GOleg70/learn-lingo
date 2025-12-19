@@ -2,6 +2,7 @@ import { useState } from "react";
 import type { Teacher } from "../../types/teacher";
 import styles from "./TeacherCard.module.css";
 import { useAuth } from "../../auth/useAuth";
+import { BookTrialModal } from "../BookTrialModal/BookTrialModal";
 
 type Props = {
   teacher: Teacher;
@@ -11,6 +12,7 @@ export function TeacherCard({ teacher }: Props) {
   const { user, isFavorite, toggleFavorite } = useAuth();
   const favorite = isFavorite(teacher.id);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isBookOpen, setIsBookOpen] = useState(false);
 
   const {
     name,
@@ -91,7 +93,11 @@ export function TeacherCard({ teacher }: Props) {
                   </ul>
                 </div>
 
-                <button type="button" className={styles.trialBtn}>
+                <button
+                  type="button"
+                  className={styles.trialBtn}
+                  onClick={() => setIsBookOpen(true)}
+                >
                   Book trial lesson
                 </button>
               </>
@@ -121,11 +127,13 @@ export function TeacherCard({ teacher }: Props) {
         >
           {favorite ? "❤️" : "♡"}
         </button>
-
-        <button type="button" onClick={() => setIsExpanded((v) => !v)}>
-          {isExpanded ? "Hide" : "Read more"}
-        </button>
       </div>
+      <BookTrialModal
+        isOpen={isBookOpen}
+        onClose={() => setIsBookOpen(false)}
+        teacherName={`${name} ${surname}`}
+        avatarUrl={avatar_url}
+      />
     </article>
   );
 }
