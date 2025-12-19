@@ -1,8 +1,10 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
+import type { FirebaseError } from "firebase/app";
 
+import { useAuth } from "../../auth/useAuth";
 import { Modal } from "../Modal/Modal";
 import styles from "./AuthModal.module.css";
 import { loginWithEmail, registerWithEmail } from "../../services/auth/authApi";
@@ -35,6 +37,8 @@ type Props = {
 
 export function AuthModal({ isOpen, onClose }: Props) {
   const [mode, setMode] = useState<Mode>("login");
+  const [authError, setAuthError] = useState<string | null>(null);
+  const { user } = useAuth();
 
   const title = useMemo(
     () => (mode === "login" ? "Log In" : "Registration"),
@@ -61,17 +65,47 @@ export function AuthModal({ isOpen, onClose }: Props) {
     mode: "onSubmit",
   });
 
-  const submitText = mode === "login" ? "Log In" : "Sign Up";
-
-  const onSubmit = async (values: FormValues) => {
-    if (mode === "login") {
-      await loginWithEmail(values.email, values.password);
-    } else {
-      await registerWithEmail(values.email, values.password);
+  // ✅ ТЕПЕР reset вже оголошений — можна використовувати
+  useEffect(() => {
+    if (user && isOpen) {
+      reset();
+      onClose();
     }
+  }, [user, isOpen, onClose, reset]);
 
-    reset();
-    onClose();
+  const submitText = mode === "login" ? "Log In" : "Sign Up";
+  function getAuthErrorMessage(code?: string) {
+    switch (code) {
+      case "auth/user-not-found":
+        return "User with this email does not exist";
+      case "auth/wrong-password":
+        return "Incorrect password";
+      case "auth/email-already-in-use":
+        return "This email is already registered";
+      case "auth/invalid-email":
+        return "Invalid email address";
+      case "auth/weak-password":
+        return "Password should be at least 6 characters";
+      default:
+        return "Authentication error. Please try again.";
+    }
+  }
+  const onSubmit = async (values: FormValues) => {
+    try {
+      setAuthError(null);
+
+      if (mode === "login") {
+        await loginWithEmail(values.email, values.password);
+      } else {
+        await registerWithEmail(values.email, values.password);
+      }
+
+      reset();
+      onClose();
+    } catch (error) {
+      const fbError = error as FirebaseError;
+      setAuthError(getAuthErrorMessage(fbError.code));
+    }
   };
 
   return (
@@ -115,6 +149,7 @@ export function AuthModal({ isOpen, onClose }: Props) {
             <span className={styles.error}>{errors.password.message}</span>
           )}
         </label>
+        {authError && <p className={styles.authError}>{authError}</p>}
 
         <button className={styles.submit} type="submit" disabled={isSubmitting}>
           {isSubmitting ? "Please wait..." : submitText}
@@ -127,6 +162,7 @@ export function AuthModal({ isOpen, onClose }: Props) {
               className={styles.switchBtn}
               onClick={() => {
                 setMode("register");
+                setAuthError(null);
                 reset();
               }}
             >
@@ -138,6 +174,7 @@ export function AuthModal({ isOpen, onClose }: Props) {
               className={styles.switchBtn}
               onClick={() => {
                 setMode("login");
+                setAuthError(null);
                 reset();
               }}
             >
