@@ -3,6 +3,7 @@ import type { Teacher } from "../../types/teacher";
 import styles from "./TeacherCard.module.css";
 import { useAuth } from "../../auth/useAuth";
 import { BookTrialModal } from "../BookTrialModal/BookTrialModal";
+import { useToast } from "../../ui/toast/useToast";
 
 type Props = {
   teacher: Teacher;
@@ -13,6 +14,7 @@ export function TeacherCard({ teacher }: Props) {
   const favorite = isFavorite(teacher.id);
   const [isExpanded, setIsExpanded] = useState(false);
   const [isBookOpen, setIsBookOpen] = useState(false);
+  const { showToast } = useToast();
 
   const {
     name,
@@ -119,7 +121,7 @@ export function TeacherCard({ teacher }: Props) {
           className={styles.heart}
           onClick={async () => {
             if (!user) {
-              alert("This feature is available only for authorized users.");
+              showToast("This feature is available only for authorized users.");
               return;
             }
             await toggleFavorite(teacher.id);
