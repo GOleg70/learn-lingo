@@ -4,6 +4,7 @@ import styles from "./TeacherCard.module.css";
 import { useAuth } from "../../auth/useAuth";
 import { BookTrialModal } from "../BookTrialModal/BookTrialModal";
 import { useToast } from "../../ui/toast/useToast";
+import { Icon } from "../Icon/Icon";
 
 type Props = {
   teacher: Teacher;
@@ -115,10 +116,10 @@ export function TeacherCard({ teacher }: Props) {
           </ul>
         </div>
 
-        {/* Серце додамо наступним комітом (Favorites) */}
+        
         <button
           type="button"
-          className={styles.heart}
+          className={`${styles.heart} ${favorite ? styles.heartActive : ""}`}
           onClick={async () => {
             if (!user) {
               showToast("This feature is available only for authorized users.");
@@ -127,7 +128,12 @@ export function TeacherCard({ teacher }: Props) {
             await toggleFavorite(teacher.id);
           }}
         >
-          {favorite ? "❤️" : "♡"}
+         
+          <Icon
+            name={favorite ? "icon-heart-filled" : "icon-heart"}
+            className={styles.heartIcon}
+            size={26}
+          />
         </button>
       </div>
       <BookTrialModal

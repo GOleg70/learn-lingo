@@ -1,39 +1,59 @@
 import { Link } from "react-router-dom";
-// import { useEffect, useMemo } from "react";
-// import { useAuth } from "../auth/useAuth";
+import styles from "./HomePage.module.css";
 
 export function HomePage() {
-  // const location = useLocation();
-  // const navigate = useNavigate();
-  // const { user } = useAuth();
-
-  // const from = (location.state as { from?: string } | null)?.from;
-
-  // const shouldShowAuthNotice = useMemo(() => {
-  //   return from === "/favorites" && !user;
-  // }, [from, user]);
-
-  // useEffect(() => {
-  //   if (shouldShowAuthNotice) {
-  //     // очищаємо state, щоб повідомлення не “залипало”
-  //     navigate(location.pathname, { replace: true, state: null });
-  //   }
-  // }, [shouldShowAuthNotice, navigate, location.pathname]);
-
   return (
     <section>
-      <h1>Home</h1>
-      <p>Це заглушка. Тут буде перелік переваг компанії.</p>
+      <div className={styles.heroGrid}>
+        <div className={styles.heroCard}>
+          <h1 className={styles.title}>
+            Unlock your potential with the best{" "}
+            <span className={styles.highlight}>language</span> tutors
+          </h1>
 
-      {/* {shouldShowAuthNotice && (
-        <p
-          style={{ padding: 12, border: "1px solid #e5e7eb", borderRadius: 12 }}
-        >
-          Favorites are available only for authorized users. Please log in.
-        </p>
-      )} */}
+          <p className={styles.subtitle}>
+            Embark on an Exciting Language Journey with Expert Language Tutors.
+            Elevate your language proficiency to new heights by connecting with
+            highly qualified and experienced tutors.
+          </p>
 
-      <Link to="/teachers">Start learning</Link>
+          <Link className={styles.cta} to="/teachers">
+            Get started
+          </Link>
+        </div>
+
+        <div className={styles.visual}>
+          <img
+            className={styles.visualImg}
+            src="/img/block-min.jpg"
+            alt="LearnLingo hero"
+          />
+        </div>
+      </div>
+
+      <div className={styles.stats}>
+        <div className={styles.statsRow}>
+          <div className={styles.stat}>
+            <span className={styles.statNum}>32,000+</span>
+            <span className={styles.statText}>Experienced tutors</span>
+          </div>
+
+          <div className={styles.stat}>
+            <span className={styles.statNum}>300,000+</span>
+            <span className={styles.statText}>5-star tutor reviews</span>
+          </div>
+
+          <div className={styles.stat}>
+            <span className={styles.statNum}>120+</span>
+            <span className={styles.statText}>Subjects taught</span>
+          </div>
+
+          <div className={styles.stat}>
+            <span className={styles.statNum}>200+</span>
+            <span className={styles.statText}>Tutor nationalities</span>
+          </div>
+        </div>
+      </div>
     </section>
   );
 }

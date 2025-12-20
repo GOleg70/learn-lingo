@@ -112,3 +112,24 @@
   padding: 10px 12px;
   cursor: pointer;
 }
+.heart {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 999px;
+  line-height: 0;
+  color: #121417;
+}
+
+.heartActive {
+  color: #f4c550;
+}
+
+.heartIcon {
+  color: currentColor;
+}
+
+.heart:hover {
+  background: rgba(18, 20, 23, 0.04);
+}

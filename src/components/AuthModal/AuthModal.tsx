@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
@@ -17,6 +17,13 @@ type FormValues = {
   password: string;
 };
 
+type Props = {
+  isOpen: boolean;
+  mode: Mode;
+  onClose: () => void;
+  onModeChange: (nextMode: Mode) => void;
+};
+
 const schema: yup.ObjectSchema<FormValues> = yup.object({
   name: yup.string().when("$mode", {
     is: "register",
@@ -30,14 +37,24 @@ const schema: yup.ObjectSchema<FormValues> = yup.object({
     .min(6, "Min 6 characters"),
 });
 
-type Props = {
-  isOpen: boolean;
-  onClose: () => void;
-};
+function getAuthErrorMessage(code?: string) {
+  switch (code) {
+    case "auth/user-not-found":
+      return "User with this email does not exist";
+    case "auth/wrong-password":
+      return "Incorrect password";
+    case "auth/email-already-in-use":
+      return "This email is already registered";
+    case "auth/invalid-email":
+      return "Invalid email address";
+    case "auth/weak-password":
+      return "Password should be at least 6 characters";
+    default:
+      return "Authentication error. Please try again.";
+  }
+}
 
-export function AuthModal({ isOpen, onClose }: Props) {
-  const [mode, setMode] = useState<Mode>("login");
-  const [authError, setAuthError] = useState<string | null>(null);
+export function AuthModal({ isOpen, mode, onClose, onModeChange }: Props) {
   const { user } = useAuth();
 
   const title = useMemo(
@@ -58,6 +75,8 @@ export function AuthModal({ isOpen, onClose }: Props) {
     handleSubmit,
     formState: { errors, isSubmitting },
     reset,
+    setError,
+    clearErrors,
   } = useForm<FormValues>({
     resolver: yupResolver(schema),
     context: { mode },
@@ -65,34 +84,19 @@ export function AuthModal({ isOpen, onClose }: Props) {
     mode: "onSubmit",
   });
 
-  // ✅ ТЕПЕР reset вже оголошений — можна використовувати
   useEffect(() => {
     if (user && isOpen) {
       reset();
+      clearErrors("root");
       onClose();
     }
-  }, [user, isOpen, onClose, reset]);
+  }, [user, isOpen, reset, clearErrors, onClose]);
 
   const submitText = mode === "login" ? "Log In" : "Sign Up";
-  function getAuthErrorMessage(code?: string) {
-    switch (code) {
-      case "auth/user-not-found":
-        return "User with this email does not exist";
-      case "auth/wrong-password":
-        return "Incorrect password";
-      case "auth/email-already-in-use":
-        return "This email is already registered";
-      case "auth/invalid-email":
-        return "Invalid email address";
-      case "auth/weak-password":
-        return "Password should be at least 6 characters";
-      default:
-        return "Authentication error. Please try again.";
-    }
-  }
+
   const onSubmit = async (values: FormValues) => {
     try {
-      setAuthError(null);
+      clearErrors("root");
 
       if (mode === "login") {
         await loginWithEmail(values.email, values.password);
@@ -104,7 +108,7 @@ export function AuthModal({ isOpen, onClose }: Props) {
       onClose();
     } catch (error) {
       const fbError = error as FirebaseError;
-      setAuthError(getAuthErrorMessage(fbError.code));
+      setError("root", { message: getAuthErrorMessage(fbError.code) });
     }
   };
 
@@ -112,6 +116,7 @@ export function AuthModal({ isOpen, onClose }: Props) {
     <Modal
       isOpen={isOpen}
       onClose={() => {
+        clearErrors("root");
         reset();
         onClose();
       }}
@@ -149,7 +154,10 @@ export function AuthModal({ isOpen, onClose }: Props) {
             <span className={styles.error}>{errors.password.message}</span>
           )}
         </label>
-        {authError && <p className={styles.authError}>{authError}</p>}
+
+        {errors.root?.message && (
+          <p className={styles.authError}>{errors.root.message}</p>
+        )}
 
         <button className={styles.submit} type="submit" disabled={isSubmitting}>
           {isSubmitting ? "Please wait..." : submitText}
@@ -161,9 +169,9 @@ export function AuthModal({ isOpen, onClose }: Props) {
               type="button"
               className={styles.switchBtn}
               onClick={() => {
-                setMode("register");
-                setAuthError(null);
+                clearErrors("root");
                 reset();
+                onModeChange("register");
               }}
             >
               No account? Sign Up
@@ -173,9 +181,9 @@ export function AuthModal({ isOpen, onClose }: Props) {
               type="button"
               className={styles.switchBtn}
               onClick={() => {
-                setMode("login");
-                setAuthError(null);
+                clearErrors("root");
                 reset();
+                onModeChange("login");
               }}
             >
               Already have an account? Log In

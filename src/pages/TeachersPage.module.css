@@ -1,0 +1,29 @@
+.page {
+  padding: 0 128px;
+  background-color: #f8f8f8;
+  border-radius: 24px;
+}
+
+.title {
+  margin: 0 0 16px;
+  font-size: 20px;
+  font-weight: 500;
+}
+
+.error {
+  color: crimson;
+}
+
+.list {
+  display: grid;
+  gap: 12px;
+  padding: 0;
+  list-style: none;
+  margin: 0;
+}
+
+.loadMoreWrap {
+  margin-top: 16px;
+  display: flex;
+  justify-content: center;
+}

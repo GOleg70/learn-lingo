@@ -73,14 +73,13 @@ export function BookTrialModal({
 
   const selectedReason = useWatch({ control, name: "reason" });
 
-  // коли закрили модалку — скидаємо форму
+  
   useEffect(() => {
     if (!isOpen) reset();
   }, [isOpen, reset]);
 
   const onSubmit = async (values: FormValues) => {
-    // Тут поки без бекенда: просто перевіримо логіку
-    // На майбутнє можна писати в Firebase (bookings)
+    
     console.log("BOOK TRIAL:", { teacherName, ...values });
 
     reset();

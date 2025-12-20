@@ -5,14 +5,11 @@ import { AuthModal } from "../components/AuthModal/AuthModal";
 import { logout } from "../services/auth/authApi";
 import { Toast } from "../components/Toast/Toast";
 import { ToastContext } from "../ui/toast/ToastContext";
-
-const linkStyle = ({ isActive }: { isActive: boolean }) => ({
-  textDecoration: "none",
-  fontWeight: isActive ? 700 : 400,
-});
+import styles from "./RootLayout.module.css";
 
 export function RootLayout() {
-  const [isAuthOpen, setIsAuthOpen] = useState(false);
+  const [authMode, setAuthMode] = useState<"login" | "register" | null>(null);
+
   const { user, isAuthLoading } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
@@ -38,42 +35,81 @@ export function RootLayout() {
 
   return (
     <ToastContext.Provider value={{ showToast }}>
-      <div style={{ maxWidth: 1100, margin: "0 auto", padding: 24 }}>
-        <header style={{ display: "flex", gap: 16, alignItems: "center" }}>
-          <strong>Learn Lingo</strong>
+      <div className={styles.container}>
+        <header className={styles.header}>
+          <div className={styles.logonav}>
+            <div className={styles.logo}>
+              <svg className={styles.iconUkr}>
+                
+                <use href="/icons/sprite.svg#ukr"></use>
+              </svg>
+              <span>Learn Lingo</span>
+            </div>
 
-          <nav style={{ display: "flex", gap: 12 }}>
-            <NavLink to="/" style={linkStyle}>
-              Home
-            </NavLink>
-            <NavLink to="/teachers" style={linkStyle}>
-              Teachers
-            </NavLink>
-            <NavLink to="/favorites" style={linkStyle}>
-              Favorites
-            </NavLink>
-          </nav>
+            <nav className={styles.nav}>
+              <NavLink
+                to="/"
+                className={({ isActive }) =>
+                  `${styles.link} ${isActive ? styles.active : ""}`
+                }
+              >
+                Home
+              </NavLink>
 
-          <div
-            style={{
-              marginLeft: "auto",
-              display: "flex",
-              gap: 10,
-              alignItems: "center",
-            }}
-          >
+              <NavLink
+                to="/teachers"
+                className={({ isActive }) =>
+                  `${styles.link} ${isActive ? styles.active : ""}`
+                }
+              >
+                Teachers
+              </NavLink>
+
+              <NavLink
+                to="/favorites"
+                className={({ isActive }) =>
+                  `${styles.link} ${isActive ? styles.active : ""}`
+                }
+              >
+                Favorites
+              </NavLink>
+            </nav>
+          </div>
+
+          <div className={styles.actions}>
             {!isAuthLoading && !user && (
-              <button type="button" onClick={() => setIsAuthOpen(true)}>
-                Log in
-              </button>
+              <>
+                <div className={styles.sectionbtnGhost}>
+                  <svg className={styles.iconLogin}>
+                   
+                    <use href="/icons/sprite.svg#icon-login"></use>
+                  </svg>
+                  <button
+                    type="button"
+                    className={styles.btnGhost}
+                    onClick={() => setAuthMode("login")}
+                  >
+                    Log in
+                  </button>
+                </div>
+                <button
+                  type="button"
+                  className={styles.btnPrimary}
+                  onClick={() => setAuthMode("register")}
+                >
+                  Registration
+                </button>
+              </>
             )}
 
             {!isAuthLoading && user && (
               <>
-                <span style={{ fontSize: 12, opacity: 0.75 }}>
-                  {user.email}
-                </span>
-                <button type="button" onClick={() => logout()}>
+                <span className={styles.email}>{user.email}</span>
+                <button
+                  type="button"
+                  className={styles.btnGhost}
+                  onClick={() => logout()}
+                >
                   Log out
                 </button>
               </>
@@ -81,11 +117,17 @@ export function RootLayout() {
           </div>
         </header>
 
-        <main style={{ paddingTop: 24 }}>
+        <main className={styles.main}>
           <Outlet />
         </main>
 
-        <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} />
+        <AuthModal
+          isOpen={authMode !== null}
+          mode={authMode ?? "login"}
+          onClose={() => setAuthMode(null)}
+          onModeChange={(m) => setAuthMode(m)}
+        />
+
         <Toast
           isOpen={Boolean(toastMessage)}
           message={toastMessage ?? ""}

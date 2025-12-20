@@ -3,6 +3,7 @@ import type { Teacher } from "../types/teacher";
 import { fetchTeachersPage } from "../services/teachers/teachersApi";
 import { TeacherCard } from "../components/TeacherCard/TeacherCard";
 import { TeachersFilters } from "../components/TeachersFilters/TeachersFilters";
+import styles from "./TeachersPage.module.css";
 
 function uniqueSorted(values: string[]) {
   return Array.from(new Set(values)).sort((a, b) => a.localeCompare(b));
@@ -16,10 +17,9 @@ export function TeachersPage() {
   const [cursor, setCursor] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(true);
 
-  // Filters
-  const [language, setLanguage] = useState<string>("All");
-  const [level, setLevel] = useState<string>("All");
-  const [price, setPrice] = useState<string>("All");
+  const [language, setLanguage] = useState("All");
+  const [level, setLevel] = useState("All");
+  const [price, setPrice] = useState("All");
 
   const isFilterActive =
     language !== "All" || level !== "All" || price !== "All";
@@ -48,7 +48,6 @@ export function TeachersPage() {
     }
 
     loadFirstPage();
-
     return () => {
       isMounted = false;
     };
@@ -72,7 +71,6 @@ export function TeachersPage() {
     }
   }
 
-  // Options for filters (build from loaded items)
   const languagesOptions = useMemo(() => {
     const all = items.flatMap((t) => t.languages);
     return uniqueSorted(all);
@@ -111,21 +109,12 @@ export function TeachersPage() {
     setPrice("All");
   }
 
-  // ✅ Коли показувати "Load more" при активних фільтрах:
-  // - якщо ще є що завантажувати
-  // - і (або немає фільтрів) або (фільтри є, але збігів поки мало/0)
-  const shouldShowLoadMore = useMemo(() => {
-    if (!hasMore) return false;
-    if (!isFilterActive) return true;
-
-    // якщо фільтри активні:
-    // - немає збігів або збігів мало — є сенс довантажити
-    return filteredItems.length < 4;
-  }, [hasMore, isFilterActive, filteredItems.length]);
+  
+  const shouldShowLoadMore = hasMore;
 
   return (
-    <section>
-      <h1>Teachers</h1>
+    <section className={styles.page}>
+      <h1 className={styles.title}>Teachers</h1>
 
       <TeachersFilters
         language={language}
@@ -142,7 +131,7 @@ export function TeachersPage() {
       />
 
       {isLoading && items.length === 0 && <p>Loading...</p>}
-      {error && <p style={{ color: "crimson" }}>{error}</p>}
+      {error && <p className={styles.error}>{error}</p>}
 
       {!isLoading && !error && filteredItems.length === 0 && (
         <p>
@@ -152,7 +141,7 @@ export function TeachersPage() {
         </p>
       )}
 
-      <ul style={{ display: "grid", gap: 12, padding: 0, listStyle: "none" }}>
+      <ul className={styles.list}>
         {filteredItems.map((t) => (
           <li key={t.id}>
             <TeacherCard teacher={t} />
@@ -161,7 +150,7 @@ export function TeachersPage() {
       </ul>
 
       {shouldShowLoadMore && (
-        <div style={{ marginTop: 16 }}>
+        <div className={styles.loadMoreWrap}>
           <button type="button" onClick={handleLoadMore} disabled={isLoading}>
             {isLoading ? "Loading..." : "Load more"}
           </button>
