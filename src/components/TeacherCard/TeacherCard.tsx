@@ -35,36 +35,92 @@ export function TeacherCard({ teacher }: Props) {
   return (
     <article className={styles.card}>
       <div className={styles.topRow}>
-        <img
-          className={styles.avatar}
-          src={avatar_url}
-          alt={`${name} ${surname}`}
-        />
+        <div className={styles.avatarWrap}>
+          <img
+            className={styles.avatar}
+            src={avatar_url}
+            alt={`${name} ${surname}`}
+          />
+          <span className={styles.onlineDot} aria-hidden="true" />
+        </div>
 
-        <div className={styles.main}>
-          <p className={styles.label}>Languages</p>
-          <h3 className={styles.name}>
-            {name} {surname}
-          </h3>
+        <div className={styles.content}>
+          <div className={styles.header}>
+            <div>
+              <p className={styles.label}>Languages</p>
+              <h3 className={styles.name}>
+                {name} {surname}
+              </h3>
+            </div>
 
-          <ul className={styles.stats}>
-            <li>Lessons done: {lessons_done}</li>
-            <li>Rating: {rating}</li>
-            <li>Price / 1 hour: {price_per_hour}$</li>
-          </ul>
+            <ul className={styles.stats} aria-label="Teacher stats">
+              <li className={styles.statItem}>
+                <Icon name="icon-book" className={styles.statIcon} size={16} />
+                <span className={styles.statText}>Lessons online</span>
+              </li>
 
-          <div className={styles.info}>
-            <p>
+              <li className={styles.statItem}>
+                <span className={styles.statText}>Lessons done: </span>
+                <span className={styles.statValue}>{lessons_done}</span>
+              </li>
+
+              <li className={styles.statItem}>
+                <Icon
+                  name="icon-star"
+                  className={styles.statIconStar}
+                  size={16}
+                />
+                <span className={styles.statText}>Rating: </span>
+                <span className={styles.statValue}>{rating}</span>
+              </li>
+
+              <li className={styles.statItem}>
+                <span className={styles.statText}>Price / 1 hour: </span>
+                <span className={styles.price}>{price_per_hour}$</span>
+              </li>
+            </ul>
+            <button
+              type="button"
+              className={`${styles.heart} ${
+                favorite ? styles.heartActive : ""
+              }`}
+              onClick={async () => {
+                if (!user) {
+                  showToast(
+                    "This feature is available only for authorized users."
+                  );
+                  return;
+                }
+                await toggleFavorite(teacher.id);
+              }}
+              aria-label={
+                favorite ? "Remove from favorites" : "Add to favorites"
+              }
+            >
+              <Icon
+                name={favorite ? "icon-heart-filled" : "icon-heart"}
+                className={styles.heartIcon}
+                size={26}
+              />
+            </button>
+          </div>
+
+          <div className={styles.details}>
+            <p className={styles.row}>
               <span className={styles.subLabel}>Speaks:</span>{" "}
-              {languages.join(", ")}
+              <span className={styles.bold}>{languages.join(", ")}</span>
             </p>
-            <p>
+
+            <p className={styles.row}>
               <span className={styles.subLabel}>Lesson Info:</span>{" "}
-              {lesson_info}
+              <span className={styles.bold}>{lesson_info}</span>
             </p>
-            <p>
+
+            <p className={styles.row}>
               <span className={styles.subLabel}>Conditions:</span>{" "}
-              {Array.isArray(conditions) ? conditions.join(" ") : ""}
+              <span className={styles.bold}>
+                {Array.isArray(conditions) ? conditions.join(" ") : ""}
+              </span>
             </p>
 
             {!isExpanded ? (
@@ -77,20 +133,37 @@ export function TeacherCard({ teacher }: Props) {
               </button>
             ) : (
               <>
-                <p>
-                  <span className={styles.subLabel}>Experience:</span>{" "}
-                  {experience}
-                </p>
+                <p className={styles.experience}>{experience}</p>
 
                 <div className={styles.reviews}>
-                  <p className={styles.subLabel}>Reviews:</p>
                   <ul className={styles.reviewList}>
                     {Array.isArray(reviews) &&
                       reviews.map((r, idx) => (
                         <li key={idx} className={styles.reviewItem}>
-                          <strong>{r.reviewer_name}</strong> —{" "}
-                          {r.reviewer_rating}
-                          <div>{r.comment}</div>
+                          <div className={styles.reviewHead}>
+                            <div className={styles.reviewUser}>
+                              <div
+                                className={styles.reviewAvatar}
+                                aria-hidden="true"
+                              >
+                                {r.reviewer_name?.slice(0, 1)}
+                              </div>
+                              <span className={styles.reviewer}>
+                                {r.reviewer_name}
+                              </span>
+                            </div>
+
+                            <span className={styles.reviewRating}>
+                              <Icon
+                                name="icon-star"
+                                className={styles.reviewStar}
+                                size={16}
+                              />
+                              <span>{r.reviewer_rating.toFixed(1)}</span>
+                            </span>
+                          </div>
+
+                          <p className={styles.reviewComment}>{r.comment}</p>
                         </li>
                       ))}
                   </ul>
@@ -98,26 +171,40 @@ export function TeacherCard({ teacher }: Props) {
 
                 <button
                   type="button"
-                  className={styles.trialBtn}
-                  onClick={() => setIsBookOpen(true)}
+                  className={styles.readLess}
+                  onClick={() => setIsExpanded(false)}
                 >
-                  Book trial lesson
+                  Read less
                 </button>
               </>
             )}
-          </div>
 
-          <ul className={styles.levels}>
-            {levels.map((lvl) => (
-              <li key={lvl} className={styles.levelChip}>
-                {lvl}
-              </li>
-            ))}
-          </ul>
+            <ul className={styles.levels}>
+              {levels.map((lvl, idx) => (
+                <li
+                  key={lvl}
+                  className={`${styles.levelChip} ${
+                    idx === 0 ? styles.levelChipActive : ""
+                  }`}
+                >
+                  #{lvl}
+                </li>
+              ))}
+            </ul>
+
+            {isExpanded && (
+              <button
+                type="button"
+                className={styles.trialBtn}
+                onClick={() => setIsBookOpen(true)}
+              >
+                Book trial lesson
+              </button>
+            )}
+          </div>
         </div>
 
-        
-        <button
+        {/* <button
           type="button"
           className={`${styles.heart} ${favorite ? styles.heartActive : ""}`}
           onClick={async () => {
@@ -127,15 +214,16 @@ export function TeacherCard({ teacher }: Props) {
             }
             await toggleFavorite(teacher.id);
           }}
+          aria-label={favorite ? "Remove from favorites" : "Add to favorites"}
         >
-         
           <Icon
             name={favorite ? "icon-heart-filled" : "icon-heart"}
             className={styles.heartIcon}
             size={26}
           />
-        </button>
+        </button> */}
       </div>
+
       <BookTrialModal
         isOpen={isBookOpen}
         onClose={() => setIsBookOpen(false)}

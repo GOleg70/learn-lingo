@@ -109,7 +109,6 @@ export function TeachersPage() {
     setPrice("All");
   }
 
-  
   const shouldShowLoadMore = hasMore;
 
   return (
@@ -130,11 +129,13 @@ export function TeachersPage() {
         isResetDisabled={!isFilterActive}
       />
 
-      {isLoading && items.length === 0 && <p>Loading...</p>}
+      {isLoading && items.length === 0 && (
+        <p className={styles.loading}>Loading...</p>
+      )}
       {error && <p className={styles.error}>{error}</p>}
 
       {!isLoading && !error && filteredItems.length === 0 && (
-        <p>
+        <p className={styles.empty}>
           {isFilterActive
             ? "No teachers found yet. Try Load more."
             : "No teachers found."}
@@ -151,7 +152,12 @@ export function TeachersPage() {
 
       {shouldShowLoadMore && (
         <div className={styles.loadMoreWrap}>
-          <button type="button" onClick={handleLoadMore} disabled={isLoading}>
+          <button
+            type="button"
+            className={styles.loadMoreBtn}
+            onClick={handleLoadMore}
+            disabled={isLoading}
+          >
             {isLoading ? "Loading..." : "Load more"}
           </button>
         </div>

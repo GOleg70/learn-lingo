@@ -1,3 +1,4 @@
+import React from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../auth/useAuth";
 
@@ -14,7 +15,19 @@ export function ProtectedRoute({ children }: Props) {
   }
 
   if (!user) {
-    return <Navigate to="/" replace state={{ from: location.pathname }} />;
+    const state = location.state as { from?: string } | null;
+    const backTo = state?.from ?? "/";
+
+    return (
+      <Navigate
+        to={backTo}
+        replace
+        state={{
+          toast:
+            "Favorites are available only for authorized users. Please log in.",
+        }}
+      />
+    );
   }
 
   return <>{children}</>;

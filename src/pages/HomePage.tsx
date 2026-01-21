@@ -3,7 +3,7 @@ import styles from "./HomePage.module.css";
 
 export function HomePage() {
   return (
-    <section>
+    <section className={styles.page}>
       <div className={styles.heroGrid}>
         <div className={styles.heroCard}>
           <h1 className={styles.title}>

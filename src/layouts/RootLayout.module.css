@@ -57,6 +57,12 @@
 .link {
   color: var(--text);
   text-decoration: none;
+
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font: inherit;
 }
 
 .link:hover {
